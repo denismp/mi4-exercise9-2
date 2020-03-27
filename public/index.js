@@ -5,10 +5,79 @@ $(document).ready(function () {
     alert("Access Denied.");
   }
 
-  const documentRegistryContractAddress = "";
+  const documentRegistryContractAddress = "0x7Ef0333C743F6d3Bb2b1ad574ab2637f8dd855e2";
 
-  const documentRegistryContractABI = [];
-
+  const documentRegistryContractABI =
+    [
+      {
+        "constant": false,
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "hash",
+            "type": "string"
+          }
+        ],
+        "name": "add",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "dateAdded",
+            "type": "uint256"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+      },
+      {
+        "constant": true,
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "index",
+            "type": "uint256"
+          }
+        ],
+        "name": "getDocument",
+        "outputs": [
+          {
+            "internalType": "string",
+            "name": "",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "constant": true,
+        "inputs": [],
+        "name": "getDocumentsCount",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "length",
+            "type": "uint256"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ];
   const IPFS = window.IpfsApi("localhost", "5001");
   const Buffer = IPFS.Buffer;
 
@@ -82,11 +151,11 @@ $(document).ready(function () {
       }
 
       let fileBuffer = Buffer.from(fileReader.result);
-      let contract = web3.eth 
+      let contract = web3.eth
         .contract(documentRegistryContractABI)
         .at(documentRegistryContractAddress);
 
-      IPFS.files.add(fileBuffer,(err,result) => {
+      IPFS.files.add(fileBuffer, (err, result) => {
         if (err) {
           showError(err);
           return;
@@ -115,52 +184,48 @@ $(document).ready(function () {
   }
 
   function viewGetDocuments() {
-    // Todo: Implementation
-    if (typeof web3 === "undefined") {
-      showError(
-        "Please install Metamask to access the Ethereum Web3 API from your web browser."
-      );
+    if (typeof web3 === 'undefined') {
+      showError('Please install Metamask to access the Ethereum Web3 API from your borwser.');
       return;
     }
-    // Implement
-    let contract = web3.eth
-      .contract(documentRegistryContractABI)
-      .at(documentRegistryContractAddress);
 
-    contract.getDocumentCount((err, res) => {
+    const contract = web3.eth.contract(documentRegistryContractABI).at(documentRegistryContractAddress);
+
+    contract.getDocumentsCount((err, res) => {
       if (err) {
-        showError("Smart contract failed: " + err);
+        showError('Smart contract failed: ' + err);
         return;
       }
 
-      let documentsCount = res.toNumber();
+      const documentsCount = res.toNumber();
 
       if (documentsCount > 0) {
-        let html = $("div");
+        const html = $('<div>');
         for (let index = 0; index < documentsCount; index++) {
           contract.getDocument(index, (error, result) => {
             if (error) {
-              showError("Smart contract failed: " + error);
+              showError('Smart contract failed: ' + error);
               return;
             }
-            let ipfsHash = result[0];
-            let contractPublishDate = result[1];
-            let div = $("<div");
-            let url = "http://localhost:8080/ipfs/" + ipfsHash;
+            const ipfsHash = result[0];
+            const contractPublishDate = result[1];
+            const div = $('<div>');
+            const url = 'http://localhost:8080/ipfs/' + ipfsHash;
 
-            let displayDate = new Date(
-              contractPublishDate * 1000
-            ).toLocaleDateString();
+            const displayDate = new Date(contractPublishDate * 1000).toLocaleDateString();
             div.append($(`<p>Document published on: ${displayDate}</p>`));
-            div.append(`<img src="${url}" />`);
+            div.append($(`<img src="${url}" style="max-width: 80vw;" />`));
             html.append(div);
-          });
+          })
         }
-        html.append("</div>");
-        $("#viewGetDocuments").append(html);
+        html.append('</div>');
+        $('#viewGetDocuments').append(html);
       } else {
-        $("#viewGetDocments").append("<div>No documents in the document registry!</div>");
+        $('#viewGetDocuments').append('<div>No document in the document registry!</div>');
       }
-    });
+
+    })
+
   }
+
 });

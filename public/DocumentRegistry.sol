@@ -28,7 +28,7 @@ contract DocumentRegistry {
         return currentTime;
     }
 
-    function getDocumentsCount() public view returns (uint256) {
+    function getDocumentsCount() public view returns (uint256 length) {
         // Todo: Implementation
         length = documents.length;
     }
